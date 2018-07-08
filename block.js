@@ -9,14 +9,14 @@ function Block(genome) {
 
   this.radius = 20;
   this.in_air = false;
-  this.jumps = 20;  // max amount of jumps before stopping
+  this.jumps = terrain.length * 2;  // max amount of jumps before stopping
 
   this.platforms_completed = new Array(terrain.length).fill(0);
   this.current_platform = -1;
   blocks.push(this);
 
   this.update = function() {
-    if (this.status == 2) return;
+    if (this.status > 0) return;
     else if (!this.in_air) this.jump();
     this.update_pos();
     this.brain.score = this.score();
@@ -30,22 +30,26 @@ function Block(genome) {
     this.pos.add(this.vel);
 
     this.check_collision();
-    if (this.pos.y > height) this.status = 1;
+    if (this.pos.y > height) this.status = 1;  // we have fallen off the map
   }
 
   this.show = function() {
-    fill(200, 30, 30);
+    var fire = this.vel.x + this.vel.y < 4 ? 0 : map(this.vel.y + this.vel.x, 4, 10, 0, 255)
+    fill(200, 255 - fire, 255 - fire);
     rect(this.pos.x, this.pos.y, this.radius, this.radius);
   }
 
   this.jump = function() {
     // Jumps in a certain direction based on the brains' output.
-    if (this.jumps == 1) status = 2; 
+    if (this.jumps <= 1) this.status = 1;
+    if (this.current_platform >= terrain.length - 1) {
+      this.status = 1;
+      return;  // we have reached last platform
+    }
     var input = this.get_input();
     var output = this.brain.activate(input);
-    if (output[0] < 0) console.log(output);
-    this.acc.x = 3 * output[0];
-    this.acc.y = -3 * output[1];
+    this.acc.x += 3 * Math.abs(output[0]);
+    this.acc.y += -3 * Math.abs(output[1]);
     this.in_air = true;
     this.jumps -= 1;
   }
@@ -53,9 +57,9 @@ function Block(genome) {
   this.get_input = function() {
     // Gets all the input for the input nodes based on the terrain and itself.
     var next_platform = terrain[this.current_platform + 1];
-    var dest_x = next_platform[0] + next_platform[2] / 2;
-    var dest_y = next_platform[1];
-    return [this.x, this.y, dest_x, dest_y];
+    var dist_x = next_platform[0] - this.pos.x;
+    var dist_y = next_platform[1] - this.pos.y;
+    return [dist_x / width, dist_y / height];
   }
 
   this.score = function() {
@@ -95,10 +99,8 @@ function Block(genome) {
             this.vel.x = 0;
             this.pos.x = rect[0] + rect[2];
         }
-
         break;
       }
-
     }
   }
 }

@@ -1,9 +1,9 @@
-PLAYER_AMOUNT = 5;
+PLAYER_AMOUNT = 20;
 MUTATION_RATE = 0.3;
 ELITISM_AMOUNT = 1;
-START_HIDDEN_SIZE = 0;
+START_HIDDEN_SIZE = 2;
 
-START_X = 40;
+START_X = 0;
 START_Y = 200;
 
 var Neat    = neataptic.Neat;
@@ -14,6 +14,8 @@ var Architect = neataptic.Architect;
 var terrain;  // A list of rectangles
 var neat;
 var blocks = [];   // All the blocks currently playing
+
+var fastmode = 0;
 
 function setup() {
   createCanvas(1000, 600);
@@ -27,7 +29,9 @@ function draw() {
   clear();
   background(150, 230, 255);
   draw_terrain();
-  run_evolution();
+  for (var i = 0; i < 150 * fastmode + 1; i++) {
+    run_evolution();
+  }
 }
 
 function generate_terrain() {
@@ -53,13 +57,13 @@ function draw_terrain() {
 
 function initNeat() {
   neat = new Neat(
-    4, 2, null,
-    { mutation: Methods.Mutation.ALL,
+    2, 2, null,
+    { mutation: [Methods.Mutation.MOD_WEIGHT, Methods.Mutation.MOD_BIAS],//Methods.Mutation.ALL,
       popsize: PLAYER_AMOUNT,
       mutationRate: MUTATION_RATE,
       elitism: ELITISM_AMOUNT,
       network: new Architect.Random(
-        4, START_HIDDEN_SIZE, 2
+        2, START_HIDDEN_SIZE, 2
       )
     }
   )
@@ -72,8 +76,7 @@ function startEvaluation() {
     //genome = neat.population[genome];
     new Block(genome);
   }
-
-  terrain = generate_terrain();
+    terrain = generate_terrain();
 }
 
 function endEvaluation() {
@@ -103,7 +106,7 @@ function run_evolution() {
   if (check_end()) return;
   for (let block of blocks) {
     block.update();
-    block.show();
+    if (!fastmode) block.show();
   }
 }
 
@@ -117,4 +120,9 @@ function check_end() {
     return true;
   }
   return false;
+}
+
+function mousePressed() {
+  // toggles fastmode between 0 and 1
+  fastmode = (fastmode == 0);
 }
