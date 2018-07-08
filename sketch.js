@@ -1,4 +1,4 @@
-PLAYER_AMOUNT = 10;
+PLAYER_AMOUNT = 5;
 MUTATION_RATE = 0.3;
 ELITISM_AMOUNT = 1;
 START_HIDDEN_SIZE = 0;
@@ -36,7 +36,7 @@ function generate_terrain() {
   while (i < width - 60) {
     i += 50 + random(50);   // x position of a new block
     var w = 30 + random(30);   // width of this block
-    color = [random(10, 50), random(60, 120), random(0, 10)];
+    color = [random(10, 30), random(70, 150), random(0, 10)];
     if (i + w > width) break;
     rectangles.push([i, height - random(300) - 50, w, height, color]);
     i += w;
@@ -74,7 +74,6 @@ function startEvaluation() {
   }
 
   terrain = generate_terrain();
-  console.log(blocks)
 }
 
 function endEvaluation() {
@@ -111,7 +110,7 @@ function run_evolution() {
 function check_end() {
   finished = true;
   for (let block of blocks) {
-    if (block.platforms_completed != terrain.length) finished = false;
+    if (block.status == 0) finished = false;  // A block is still moving
   }
   if (finished) {
     endEvaluation();
