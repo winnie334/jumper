@@ -48,6 +48,7 @@ function Block(genome) {
     }
     var input = this.get_input();
     var output = this.brain.activate(input);
+    if (input[0] < 0) console.log(input)
     this.acc.x += 3 * Math.abs(output[0]);
     this.acc.y += -3 * Math.abs(output[1]);
     this.in_air = true;
@@ -59,7 +60,8 @@ function Block(genome) {
     var next_platform = terrain[this.current_platform + 1];
     var dist_x = next_platform[0] - this.pos.x;
     var dist_y = next_platform[1] - this.pos.y;
-    return [dist_x / width, dist_y / height];
+    var inp_y = map(dist_y / height, -1, 1, 0, 1);
+    return [dist_x / 200, inp_y];
   }
 
   this.score = function() {
@@ -81,7 +83,8 @@ function Block(genome) {
         this.vel.mult(0);
         this.pos.y = rect[1] - r;
         this.in_air = false;
-        this.platforms_completed[i] = true;
+        if (i == 0 || (i > 0 && this.platforms_completed[i-1]))
+          this.platforms_completed[i] = true;
         this.current_platform = i;
         if (this.score() == terrain.length) this.status = 2;  // we have done everything
         break;
