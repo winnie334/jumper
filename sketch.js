@@ -1,4 +1,4 @@
-PLAYER_AMOUNT = 20;
+PLAYER_AMOUNT = 10;
 MUTATION_RATE = 0.3;
 ELITISM_AMOUNT = 1;
 START_HIDDEN_SIZE = 2;
@@ -17,7 +17,7 @@ var neat;
 var blocks = [];   // All the blocks currently playing
 
 var fastmode = 0;
-var randmode = 0;  // makes the terrain random
+var randmode = 1;  // makes the terrain random
 var buttons = [];  // List of button objects
 
 function setup() {
@@ -34,7 +34,7 @@ function draw() {
   clear();
   background(150, 230, 255);
   draw_terrain();
-  for (var i = 0; i < 150 * fastmode + 1; i++) {  // Run evolution frames
+  for (var i = 0; i < 9000 * fastmode + 1; i++) {  // Run evolution frames
     run_evolution();   // Drawing takes most time, skipping this speeds up
   }
   display_interface();  // draw buttons and text
@@ -45,8 +45,8 @@ function generate_terrain() {
   var i = 0;
   var rectangles = [];
   while (i < width - 60) {
-    i += 50 + random(50);   // x position of a new block
-    var w = 60 + random(30);   // width of this block
+    i += 50 + random(150);   // x position of a new block
+    var w = 30 + random(30);   // width of this block
     color = [random(10, 30), random(70, 150), random(0, 10)];
     if (i + w > width) break;
     rectangles.push([i, height - random(300) - 50, w, height, color]);
@@ -96,11 +96,15 @@ function endEvaluation() {
   var output = "Generation " + neat.generation + " done! \t\t";
   output += "average score: " + neat.getAverage() + "\t\t";
   output += "Best: " + neat.getFittest().score;
-  console.log(output);
+  if (!fastmode || neat.generation % 5 == 0) console.log(output);
 
   neat.sort();
 
   var newPopulation = [];
+
+  for (let genome of neat.population) {
+    genome.score -= genome.nodes.length / 200;
+  }
 
   for (var i = 0; i < ELITISM_AMOUNT; i++) {  // Gets best blocks and transfers
     newPopulation.push(neat.population[i]);   // them to next generation
