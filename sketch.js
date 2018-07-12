@@ -1,6 +1,6 @@
-PLAYER_AMOUNT = 10;
+PLAYER_AMOUNT = 20;
 MUTATION_RATE = 0.3;
-ELITISM_AMOUNT = 1;
+ELITISM_AMOUNT = 2;
 START_HIDDEN_SIZE = 2;
 
 START_X = 0;
@@ -18,12 +18,13 @@ var blocks = [];   // All the blocks currently playing
 
 var fastmode = 0;
 var randmode = 1;  // makes the terrain random
+var timemode = 0;  // blocks get better score if faster
 var buttons = [];  // List of button objects
 
 function setup() {
   createCanvas(1000, 600);
   load_images();
-  terrain = generate_terrain()//generate_terrain();
+  terrain = generate_terrain();
   strokeWeight(3);
   textSize(32);
   initNeat();
@@ -34,7 +35,7 @@ function draw() {
   clear();
   background(150, 230, 255);
   draw_terrain();
-  for (var i = 0; i < 9000 * fastmode + 1; i++) {  // Run evolution frames
+  for (var i = 0; i < 2000 * fastmode + 1; i++) {  // Run evolution frames
     run_evolution();   // Drawing takes most time, skipping this speeds up
   }
   display_interface();  // draw buttons and text
@@ -45,11 +46,11 @@ function generate_terrain() {
   var i = 0;
   var rectangles = [];
   while (i < width - 60) {
-    i += 50 + random(150);   // x position of a new block
-    var w = 30 + random(30);   // width of this block
+    i += 20 + random(100);   // x position of a new block
+    var w = 30 + random(65);   // width of this block
     color = [random(10, 30), random(70, 150), random(0, 10)];
     if (i + w > width) break;
-    rectangles.push([i, height - random(300) - 50, w, height, color]);
+    rectangles.push([i, height - random(250) - 50, w, height, color]);
     i += w;
   }
   return rectangles;
@@ -144,6 +145,7 @@ function mousePressed() {
   // checks if mouse is inside any of the buttons and if so, toggles a var.
   if (buttons[0].inside(mouseX, mouseY)) fastmode = 1 - fastmode;
   else if (buttons[2].inside(mouseX, mouseY)) randmode = 1 - randmode;
+  else if (buttons[4].inside(mouseX, mouseY)) timemode = 1 - timemode;
 }
 
 function load_images() {
@@ -151,6 +153,10 @@ function load_images() {
   buttons.push(new Button("images/ff_1.png", width - 70, 10, 0.5, 0.5));
   buttons.push(new Button("images/rand_0.png", width - 130, 10, 0.5, 0.5));
   buttons.push(new Button("images/rand_1.png", width - 130, 10, 0.5, 0.5));
+  buttons.push(new Button("images/clock_0.png", width - 190, 10, 0.5, 0.5));
+  buttons.push(new Button("images/clock_1.png", width - 190, 10, 0.5, 0.5));
+  buttons.push(new Button("images/star_0.png", width - 250, 10, 0.5, 0.5));
+  buttons.push(new Button("images/star_1.png", width - 250, 10, 0.5, 0.5));
 }
 
 function display_interface() {
@@ -159,4 +165,5 @@ function display_interface() {
   text("Generation " + neat.generation, 20, 52);
   buttons[fastmode].show();
   buttons[randmode + 2].show();
+  buttons[timemode + 4].show();
 }

@@ -10,6 +10,7 @@ function Block(genome) {
   this.radius = 20;
   this.in_air = false;
   this.jumps = terrain.length * 2;  // max amount of jumps before stopping
+  this.ticks = 0;
 
   this.platforms_completed = new Array(terrain.length).fill(0);
   this.current_platform = -1;
@@ -18,6 +19,7 @@ function Block(genome) {
   this.update = function() {
     if (this.status > 0) return;
     else if (!this.in_air) this.jump();
+    this.ticks++;
     this.update_pos();
     this.brain.score = this.score();
   }
@@ -48,7 +50,7 @@ function Block(genome) {
     }
     var input = this.get_input();
     var output = this.brain.activate(input);
-    if (input[0] < 0) console.log(input)
+
     this.acc.x += 3 * Math.abs(output[0]);
     this.acc.y += -3 * Math.abs(output[1]);
     this.in_air = true;
@@ -57,8 +59,11 @@ function Block(genome) {
 
   this.get_input = function() {
     // Gets all the input for the input nodes based on the terrain and itself.
+    // Currently two input nodes;
+    // One being the horizontal distance to the center of the next platform,
+    // The other being the vertical distance.
     var next_platform = terrain[this.current_platform + 1];
-    var dist_x = next_platform[0] - this.pos.x;
+    var dist_x = next_platform[0] + next_platform[2] / 2 - this.pos.x;
     var dist_y = next_platform[1] - this.pos.y;
     var inp_y = map(dist_y / height, -1, 1, 0, 1);
     return [dist_x / 200, inp_y];
@@ -66,7 +71,10 @@ function Block(genome) {
 
   this.score = function() {
     // score is equal to amount of platforms completed.
-    return this.platforms_completed.reduce((a, b) => a + b, 0);
+    var score = this.platforms_completed.reduce((a, b) => a + b, 0);
+    // If we completed the course, we get more points the faster we did it.
+    if (timemode && score == terrain.length) score += 10000 - this.ticks;
+    return score;
   }
 
   this.check_collision = function() {
