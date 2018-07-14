@@ -38,4 +38,6 @@ It is not rare to see 1000 generations pass before any significant progress is b
 ## How to run
 It is possible to [run this script in your browser](https://winnie334.github.io/jumper/). If you want to fiddle with the code however,
 download or clone the repo, and open **index.html**. Alternatively you can host a local server to run it on. It should work straight away.
-If not, please report the bug so I can do absolutely nothing whatsoever to fix it.
+If not, please report the bug and I might take a look at it.
+
+Have fun!
